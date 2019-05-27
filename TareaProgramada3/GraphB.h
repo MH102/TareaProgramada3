@@ -2,6 +2,22 @@ using namespace std;
 const long int MaxT = 10;
 typedef long int pIndex;
 
+struct Edge {
+	int orig;
+	int dest;
+	int dist;
+	int velMax;
+	int velPro;
+	int peso;
+	Edge(int origP, int destP, int distP, int velMaxP, int velProP) {
+		orig = origP;
+		dest = destP;
+		dist = distP;
+		velMax = velMaxP;
+		velPro = velProP;
+		peso = (dist * 60) / velPro;
+	}
+};
 struct TKey {
 	char valor[MaxT];
 	pIndex pRegistro;

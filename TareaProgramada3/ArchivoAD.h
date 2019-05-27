@@ -41,6 +41,7 @@ private:
 	bool abierto;
 public:
 	ArchivoDirecto(string nombre);
+	ArchivoDirecto();
 	string info();
 	void cerrar();
 	int tam();
