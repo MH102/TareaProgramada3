@@ -45,6 +45,7 @@ public:
 	string info();
 	void cerrar();
 	int tam();
+	int gtamn();
 	void actualizar(Nodo& r);
 	void agregarFinal(Nodo& r);
 	void init();
@@ -80,6 +81,9 @@ void ArchivoDirecto::cerrar() {
 }
 int ArchivoDirecto::tam() {
 	return (abierto ? nRegistros : 0);
+}
+int ArchivoDirecto::gtamn() {
+	return tamn;
 }
 void ArchivoDirecto::actualizar(Nodo& r) {
 	if (abierto && r.valor < nRegistros) {

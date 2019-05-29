@@ -1,5 +1,4 @@
 #include <iostream>
-#include "GraphB.h"
 #include "ArchivoAD.h"
 #include "Ventana.h"
 #include <fstream>

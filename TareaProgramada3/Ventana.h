@@ -2,6 +2,7 @@
 #include "GUI.h"
 #include "Simple_window.h"
 #include <fstream>
+#include "GraphB.h"
 using namespace Graph_lib;
 vector<string> split(string cadena, char divisor) {
 	vector<string> vec;
@@ -58,8 +59,8 @@ struct Ventana :
 					ed.pop_back();
 				}
 			}
-			nombre = split(split(entrada.get_string(), ' ').at(1), '.').at(0) + ".VRT";
-			ad = new ArchivoDirecto(nombre);
+			nombre = split(split(entrada.get_string(), ' ').at(1), '.').at(0);
+			ad = new ArchivoDirecto(nombre + ".VRT");
 			ifstream arch;
 			arch.open(split(entrada.get_string(),' ').at(1));
 			string info;
@@ -81,6 +82,7 @@ struct Ventana :
 				Edge e(a, b, c, d, f);
 				ed.push_back(e);
 			}
+			arch.close();
 			open = true;
 			for (int i = 0; i < ad->tam(); i++) {
 				Nodo q = ad->leer(i);
@@ -311,6 +313,10 @@ struct Ventana :
 				s += vec5.at(i) + "\n";
 			}
 			salida.put(s);
+			for (int i = 0; i < ed.size(); i++) {
+				cout << ed.at(i).peso << endl;
+			}
+			driver(ad->gtamn(), stoi(split(entrada.get_string(), ' ').at(1)), ed);
 		}
 		if (split(entrada.get_string(), ' ').at(0) == "to") {
 			vec5.push_back(entrada.get_string());
