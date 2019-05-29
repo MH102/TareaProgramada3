@@ -121,7 +121,7 @@ struct Ventana :
 				Line * l3 = new Line(mid, arrowhead04);
 				l3->set_color(Color::blue);
 				mid.y += -8;
-				Text * t2 = new Text(mid, to_string(t.peso));
+				Text * t2 = new Text(arrowhead03, to_string(t.peso));
 				t2->set_color(Color::red);
 				t2->set_font_size(10);
 				this->attach(*l);
@@ -338,8 +338,8 @@ public:
 	Ventana(Point xy, int w, int h, const string& title, ArchivoDirecto * ad)
 		: Window(xy, w, h, title), 
 		button_pushed(false),
-		salida(Point(0, 0), 150, 875, "Salida"),
-		entrada(Point(0, 875), 150, 25, "Entrada"),
+		salida(Point(0, 0), 150, 725, "Salida"),
+		entrada(Point(0, 725), 150, 25, "Entrada"),
 		ad{ ad }
 	{
 		attach(salida);

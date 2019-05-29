@@ -6,7 +6,7 @@
 int main()
 {
 	ArchivoDirecto * ad = new ArchivoDirecto("");
-	Ventana v(Point(0,0),1500,900,"Ventana",ad);
+	Ventana v(Point(0,0),1500,750,"Ventana",ad);
 	v.wait_for_enter();
 	return 0;
 }
