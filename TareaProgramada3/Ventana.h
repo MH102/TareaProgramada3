@@ -22,6 +22,38 @@ vector<string> split(string cadena, char divisor) {
 struct Ventana :
 	public Window
 {
+	void clear() {
+		for (int i = 0; i < vec.size(); i++) {
+			Circle * c = vec.at(i);
+			vec.at(i) = 0;
+			this->detach(*c);
+			c->set_fill_color(Color::black);
+			vec.at(i) = c;
+			this->attach(*c);
+		}
+		for (int i = 0; i < vec3.size(); i++) {
+			Line * l = vec3.at(i);
+			vec3.at(i) = 0;
+			this->detach(*l);
+			l->set_color(Color::blue);
+			vec3.at(i) = l;
+			this->attach(*l);
+		}
+		this->redraw();
+	}
+	void inodo(Nodo n) {
+		for (int i = 0; i < vec.size(); i++) {
+			if (vec.at(i)->point(0).x == n.coorX + 155 && vec.at(i)->point(0).y == n.coorY - 5) {
+				Circle * c = vec.at(i);
+				vec.at(i) = 0;
+				this->detach(*c);
+				c->set_fill_color(Color::red);
+				vec.at(i) = c;
+				this->attach(*c);
+			}
+		}
+		this->redraw();
+	}
 	void enter() {
 		if (split(entrada.get_string(),' ').at(0) == "import") {
 			vec5.push_back(entrada.get_string());
@@ -56,7 +88,9 @@ struct Ventana :
 					delete(t);
 				}
 				while (ed.size() != 0) {
+					Edge * t = ed.back();
 					ed.pop_back();
+					delete(t);
 				}
 			}
 			nombre = split(split(entrada.get_string(), ' ').at(1), '.').at(0);
@@ -79,7 +113,7 @@ struct Ventana :
 				c = stoi(r.at(2));
 				d = stoi(r.at(3));
 				f = stoi(r.at(4));
-				Edge e(a, b, c, d, f);
+				Edge * e = new Edge(a, b, c, d, f);
 				ed.push_back(e);
 			}
 			arch.close();
@@ -100,9 +134,9 @@ struct Ventana :
 				}
 			}
 			for (int i = 0; i < ed.size(); i++) {
-				Edge t = ed.at(i);
-				Nodo n1 = ad->leer(t.orig);
-				Nodo n2 = ad->leer(t.dest);
+				Edge * t = ed.at(i);
+				Nodo n1 = ad->leer(t->orig);
+				Nodo n2 = ad->leer(t->dest);
 				Point start(n1.coorX + 160, n1.coorY);
 				Point end(n2.coorX + 160, n2.coorY);
 				Line * l = new Line(start,end);
@@ -123,7 +157,7 @@ struct Ventana :
 				Line * l3 = new Line(mid, arrowhead04);
 				l3->set_color(Color::blue);
 				mid.y += -8;
-				Text * t2 = new Text(arrowhead03, to_string(t.peso));
+				Text * t2 = new Text(arrowhead03, to_string(t->peso));
 				t2->set_color(Color::red);
 				t2->set_font_size(10);
 				this->attach(*l);
@@ -172,7 +206,9 @@ struct Ventana :
 				delete(t);
 			}
 			while (ed.size() != 0) {
+				Edge * t = ed.back();
 				ed.pop_back();
+				delete(t);
 			}
 			open = false;
 			this->redraw();
@@ -185,23 +221,7 @@ struct Ventana :
 				s += vec5.at(i) + "\n";
 			}
 			salida.put(s);
-			for (int i = 0; i < vec.size(); i++) {
-				Circle * c = vec.at(i);
-				vec.at(i) = 0;
-				this->detach(*c);
-				c->set_fill_color(Color::black);
-				vec.at(i) = c;
-				this->attach(*c);
-			}
-			for (int i = 0; i < vec3.size(); i++) {
-				Line * l = vec3.at(i);
-				vec3.at(i) = 0;
-				this->detach(*l);
-				l->set_color(Color::blue);
-				vec3.at(i) = l;
-				this->attach(*l);
-			}
-			this->redraw();
+			clear();
 		}
 		if (entrada.get_string() == "cleart") {
 			salida.put("");
@@ -237,7 +257,9 @@ struct Ventana :
 					delete(t);
 				}
 				while (ed.size() != 0) {
+					Edge * t = ed.back();
 					ed.pop_back();
+					delete(t);
 				}
 			}
 			vec5.push_back(entrada.get_string());
@@ -258,18 +280,8 @@ struct Ventana :
 			for (int i = 0; i < vec5.size(); i++) {
 				s += vec5.at(i) + "\n";
 			}
+			inodo(n);
 			salida.put(s);
-			for (int i = 0; i < vec.size(); i++) {
-				if (vec.at(i)->point(0).x == n.coorX + 155 && vec.at(i)->point(0).y == n.coorY - 5) {
-					Circle * c = vec.at(i);
-					vec.at(i) = 0;
-					this->detach(*c);
-					c->set_fill_color(Color::red);
-					vec.at(i) = c;
-					this->attach(*c);
-				}
-			}
-			this->redraw();
 			
 		}
 		if (split(entrada.get_string(), ' ').at(0) == "arcs") {
@@ -307,19 +319,117 @@ struct Ventana :
 			this->redraw();
 		}
 		if (split(entrada.get_string(), ' ').at(0) == "spt") {
+			if (entrada.get_string().size() < 4) { 
+				entrada.clean(); 
+				return; 
+			}
 			vec5.push_back(entrada.get_string());
 			string s = "";
 			for (int i = 0; i < vec5.size(); i++) {
 				s += vec5.at(i) + "\n";
 			}
 			salida.put(s);
-			for (int i = 0; i < ed.size(); i++) {
-				cout << ed.at(i).peso << endl;
+			clear();
+			Nodo n = ad->leer(stoi(split(entrada.get_string(), ' ').at(1)));
+			inodo(n);
+			spts = stoi(split(entrada.get_string(), ' ').at(1));
+			vector<vector<int>> temp = driver(ad->gtamn(), stoi(split(entrada.get_string(), ' ').at(1)), ed);
+			for (int i = 0; i < temp.size(); i++) {
+				for (int k = 0; k < vec3.size(); k++) {
+					Nodo n1 = ad->leer(temp.at(i).at(0));
+					Nodo n2 = ad->leer(temp.at(i).at(1));
+					if (vec3.at(k)->point(0).x == n1.coorX + 160 && vec3.at(k)->point(0).y == n1.coorY && vec3.at(k)->point(1).x == n2.coorX + 160 && vec3.at(k)->point(1).y == n2.coorY) {
+						Line * c = vec3.at(k);
+						vec3.at(k) = 0;
+						this->detach(*c);
+						c->set_color(Color::red);
+						vec3.at(k) = c;
+						this->attach(*c);
+						c = vec3.at(k + 1);
+						vec3.at(k + 1) = 0;
+						this->detach(*c);
+						c->set_color(Color::red);
+						vec3.at(k + 1) = c;
+						this->attach(*c);
+						c = vec3.at(k + 2);
+						vec3.at(k + 2) = 0;
+						this->detach(*c);
+						c->set_color(Color::red);
+						vec3.at(k + 2) = c;
+						this->attach(*c);
+					}
+				}
+				this->redraw();
 			}
-			driver(ad->gtamn(), stoi(split(entrada.get_string(), ' ').at(1)), ed);
 		}
 		if (split(entrada.get_string(), ' ').at(0) == "to") {
+			if (split(vec5.back(), ' ').at(0) != "spt") {
+				return;
+			}
 			vec5.push_back(entrada.get_string());
+			clear();
+			int dests = stoi(split(entrada.get_string(), ' ').at(1));
+			vector<vector<int>> temp = driver(ad->gtamn(), spts, ed, dests);
+			vector<vector<int>> temp2;
+			string costo = to_string(temp.back().at(0));
+			temp.pop_back();
+			bool tester = false;
+			for (int i = 0; i < temp.size(); i++) {
+				if (temp.at(i).at(1) == dests) {
+					tester = true;
+					cout << temp.at(i).at(1) << endl;
+					temp2.push_back(temp.at(i));
+					break;
+				}
+			}
+			if (!tester) {
+				entrada.clean();
+				return;
+			}
+			int cur = temp2.back().at(0);
+			while (cur != spts) {
+				for (int i = 0; i < temp.size(); i++) {
+					if (temp.at(i).at(1) == cur) {
+						cur = temp.at(i).at(0);
+						temp2.push_back(temp.at(i));
+					}
+				}
+			}
+			for (int i = 0; i < temp2.size(); i++) {
+				for (int k = 0; k < vec3.size(); k++) {
+					Nodo n1 = ad->leer(temp2.at(i).at(0));
+					Nodo n2 = ad->leer(temp2.at(i).at(1));
+					inodo(n1);
+					inodo(n2);
+					if (vec3.at(k)->point(0).x == n1.coorX + 160 && vec3.at(k)->point(0).y == n1.coorY && vec3.at(k)->point(1).x == n2.coorX + 160 && vec3.at(k)->point(1).y == n2.coorY) {
+						Line * c = vec3.at(k);
+						vec3.at(k) = 0;
+						this->detach(*c);
+						c->set_color(Color::red);
+						vec3.at(k) = c;
+						this->attach(*c);
+						c = vec3.at(k + 1);
+						vec3.at(k + 1) = 0;
+						this->detach(*c);
+						c->set_color(Color::red);
+						vec3.at(k + 1) = c;
+						this->attach(*c);
+						c = vec3.at(k + 2);
+						vec3.at(k + 2) = 0;
+						this->detach(*c);
+						c->set_color(Color::red);
+						vec3.at(k + 2) = c;
+						this->attach(*c);
+					}
+				}
+				this->redraw();
+			}
+			vec5.push_back("[Camino de " + to_string(spts) + " a " + to_string(dests));
+			while (temp2.size() != 0) {
+				vec5.push_back(to_string(temp2.back().at(0)) + " -> " + to_string(temp2.back().at(1)));
+				temp2.pop_back();
+			}
+			vec5.push_back("Costo total: " + costo + "]");
 			string s = "";
 			for (int i = 0; i < vec5.size(); i++) {
 				s += vec5.at(i) + "\n";
@@ -332,10 +442,11 @@ struct Ventana :
 public:
 	Out_box salida;
 	In_box entrada;
+	int spts;
 	string nombre;
 	ArchivoDirecto * ad;
 	bool open = false;
-	vector<Edge> ed;
+	vector<Edge*> ed;
 	vector<Circle*> vec;
 	vector<Text*> vec2;
 	vector<Line*> vec3;
