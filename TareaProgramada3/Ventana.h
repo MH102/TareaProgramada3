@@ -175,6 +175,7 @@ struct Ventana :
 			button_pushed = true;
 		}
 		if (entrada.get_string() == "close"){
+			ad->cerrar();
 			vec5.push_back(entrada.get_string());
 			string s = "";
 			for (int i = 0; i < vec5.size(); i++) {
@@ -268,14 +269,31 @@ struct Ventana :
 				s += vec5.at(i) + "\n";
 			}
 			salida.put(s);
-			nombre = split(entrada.get_string(), ' ').at(1) + ".VRT";
-			ad = new ArchivoDirecto(nombre);
+			nombre = split(entrada.get_string(), ' ').at(1);
+			ad = new ArchivoDirecto(nombre+ ".VRT" );
+			for (int i = 0; i < ad->tam(); i++) {
+				Nodo q = ad->leer(i);
+				if (q.valor != -1) {
+					ad->actualizar(q);
+					Circle * c = new Circle(Point(q.coorX + 160, q.coorY), 5);
+					Text * t = new Text(Point(q.coorX + 154, q.coorY - 6), to_string(q.valor));
+					c->set_color(Color::black);
+					c->set_fill_color(Color::black);
+					t->set_color(Color::black);
+					t->set_font_size(10);
+					this->attach(*c);
+					this->attach(*t);
+					vec.push_back(c);
+					vec2.push_back(t);
+				}
+			}
+			this->redraw();
 		}
 		if (split(entrada.get_string(), ' ').at(0) == "node") {
 			int valor = stoi(split(entrada.get_string(), ' ').at(1));
 			Nodo n = ad->leer(valor);
 			vec5.push_back(entrada.get_string());
-			vec5.push_back("Coordenadas: (" + to_string(n.coorX) + "," + to_string(n.coorY)+ ")");
+			vec5.push_back("Coordenadas: \n(" + to_string(n.coorX) + "," + to_string(n.coorY)+ ")");
 			string s = "";
 			for (int i = 0; i < vec5.size(); i++) {
 				s += vec5.at(i) + "\n";
@@ -289,12 +307,17 @@ struct Ventana :
 			Nodo n = ad->leer(valor);
 			vec5.push_back(entrada.get_string());
 			string s = "";
+			for (int i = 0; i < ed.size(); i++) {
+				if (n.valor == ed.at(i)->orig) {
+					string inf = "Arco " + to_string(n.valor) + "->" + to_string(ed.at(i)->dest) + "\n" + "Distancia: " + to_string(ed.at(i)->dist) + "\nVel Maxima: "+ to_string(ed.at(i)->velMax) + "\nVel Promedio: " + to_string(ed.at(i)->velPro);
+					vec5.push_back(inf);
+				}
+			}
 			for (int i = 0; i < vec5.size(); i++) {
 				s += vec5.at(i) + "\n";
 			}
 			salida.put(s);
 			for (int i = 0; i < vec3.size(); i++) {
-				cout << vec3.at(i)->point(0).x << "," << n.coorX + 160 << "|" << vec3.at(i)->point(0).y << "," << n.coorY<< endl;
 				if (vec3.at(i)->point(0).x == n.coorX + 160 && vec3.at(i)->point(0).y == n.coorY) {
 					Line * c = vec3.at(i);
 					vec3.at(i) = 0;
@@ -435,6 +458,11 @@ struct Ventana :
 				s += vec5.at(i) + "\n";
 			}
 			salida.put(s);
+		}
+		if (vec5.size() > 44) {
+			while (vec5.size() != 0) {
+				vec5.pop_back();
+			}
 		}
 		entrada.clean();
 	}

@@ -39,6 +39,7 @@ private:
 	int tamn;
 	fstream fs;
 	bool abierto;
+	bool test = false;
 public:
 	ArchivoDirecto(string nombre);
 	ArchivoDirecto();
@@ -65,9 +66,10 @@ ArchivoDirecto::ArchivoDirecto(string nombre) {
 	else {
 		fs.seekg(0);
 		fs.read(as_bytes(nRegistros), sizeof(nRegistros));
+		test = true;
 	}
-	nArchivo = nombre;
 	abierto = true;
+	nArchivo = nombre;
 	init();
 }
 string ArchivoDirecto::info() {
@@ -89,7 +91,9 @@ void ArchivoDirecto::actualizar(Nodo& r) {
 	if (abierto && r.valor < nRegistros) {
 		fs.seekp(sizeof(int) + r.valor * sizeof(Nodo));
 		fs.write(as_bytes(r), sizeof(Nodo));
-		tamn++;
+		if (r.valor == -1) {
+			tamn++;
+		}
 	}
 }
 void ArchivoDirecto::agregarFinal(Nodo& r) {
@@ -101,11 +105,14 @@ void ArchivoDirecto::agregarFinal(Nodo& r) {
 	}
 }
 void ArchivoDirecto::init() {
-	if (abierto) {
+	if (!test) {
 		for (int i = 0; i < 1000; i++) {
 			Nodo q(-1, -1, -1);
 			agregarFinal(q);
 		}
+	}
+	else {
+		nRegistros = 999;
 	}
 }
 Nodo ArchivoDirecto::leer(int i) {
