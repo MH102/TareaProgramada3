@@ -95,6 +95,7 @@ struct Ventana :
 			}
 			nombre = split(split(entrada.get_string(), ' ').at(1), '.').at(0);
 			ad = new ArchivoDirecto(nombre + ".VRT");
+			ad2 = new ArchivoDirecto2(nombre + ".ARC");
 			ifstream arch;
 			arch.open(split(entrada.get_string(),' ').at(1));
 			string info;
@@ -105,6 +106,7 @@ struct Ventana :
 				Nodo c(stoi(split(info, ',').at(0)), stoi(split(info, ',').at(1)), stoi(split(info, ',').at(2)));
 				ad->actualizar(c);
 			}
+			int loop=0;
 			while (getline(arch, info)) {
 				int a, b, c, d, f;
 				vector<string> r = split(info, ',');
@@ -114,8 +116,12 @@ struct Ventana :
 				d = stoi(r.at(3));
 				f = stoi(r.at(4));
 				Edge * e = new Edge(a, b, c, d, f);
+				Edge ald(a, b, c, d, f);
+				ad2->actualizar(loop,ald);
+				loop++;
 				ed.push_back(e);
 			}
+			cout << ed.size();
 			arch.close();
 			open = true;
 			for (int i = 0; i < ad->tam(); i++) {
@@ -174,8 +180,135 @@ struct Ventana :
 		if (entrada.get_string() == "salir") {
 			button_pushed = true;
 		}
+		if (split(entrada.get_string(), ' ').at(0) == "open") {
+			if (open) {
+				while (vec.size() != 0) {
+					Circle *t = vec.back();
+					vec.pop_back();
+					this->detach(*t);
+					delete(t);
+				}
+				while (vec2.size() != 0) {
+					Text *t = vec2.back();
+					vec2.pop_back();
+					this->detach(*t);
+					delete(t);
+				}
+				while (vec3.size() != 0) {
+					Line *l = vec3.back();
+					vec3.pop_back();
+					this->detach(*l);
+					delete(l);
+				}
+				while (vec4.size() != 0) {
+					Text *t = vec4.back();
+					vec4.pop_back();
+					this->detach(*t);
+					delete(t);
+				}
+				while (ed.size() != 0) {
+					Edge * t = ed.back();
+					ed.pop_back();
+					delete(t);
+				}
+			}
+			vec5.push_back(entrada.get_string());
+			string s = "";
+			for (int i = 0; i < vec5.size(); i++) {
+				s += vec5.at(i) + "\n";
+			}
+			salida.put(s);
+			nombre = split(entrada.get_string(), ' ').at(1);
+			ad = new ArchivoDirecto(nombre + ".VRT");
+			ad2 = new ArchivoDirecto2(nombre + ".ARC");
+			for (int i = 0; i < ad->tam(); i++) {
+				Nodo q = ad->leer(i);
+				if (q.valor != -1) {
+					ad->actualizar(q);
+					Circle * c = new Circle(Point(q.coorX + 160, q.coorY), 5);
+					Text * t = new Text(Point(q.coorX + 154, q.coorY - 6), to_string(q.valor));
+					c->set_color(Color::black);
+					c->set_fill_color(Color::black);
+					t->set_color(Color::black);
+					t->set_font_size(10);
+					this->attach(*c);
+					this->attach(*t);
+					vec.push_back(c);
+					vec2.push_back(t);
+				}
+			}
+			for (int i = 0; i < ad2->tam(); i++) {
+				if (ad2->leer(i).orig != -1) {
+					Edge * t = new Edge(ad2->leer(i).orig, ad2->leer(i).dest, ad2->leer(i).dist, ad2->leer(i).velMax, ad2->leer(i).velPro);
+					ad2->actualizar(i, *t);
+					cout << t->orig << " " << t->dest << endl;
+					ed.push_back(t);
+				}
+			}
+			for (int i = 0; i < ed.size(); i++) {
+				Edge * t = ed.at(i);
+				Nodo n1 = ad->leer(t->orig);
+				Nodo n2 = ad->leer(t->dest);
+				Point start(n1.coorX + 160, n1.coorY);
+				Point end(n2.coorX + 160, n2.coorY);
+				Line * l = new Line(start, end);
+				l->set_color(Color::blue);
+				//FLECHA
+				Point mid((n1.coorX / 2 + n2.coorX / 2) + 160, n1.coorY / 2 + n2.coorY / 2);
+				Point d = Point(start.x - mid.x, start.y - mid.y);
+				double dMag = sqrt(pow(d.x, 2) + pow(d.y, 2));
+				Point dUnit = Point(d.x / dMag * 7, d.y / dMag * 7);
+				Point dTrans = Point(dUnit.x, dUnit.y);
+				//Arrow Head End
+				Point dPerp = Point(-dTrans.y, dTrans.x);
+				Point arrowhead03 = Point(mid.x + dPerp.x + dTrans.x, mid.y + dPerp.y + dTrans.y);
+				Point arrowhead04 = Point(mid.x - dPerp.x + dTrans.x, mid.y - dPerp.y + dTrans.y);
+				//FLECHA-END
+				Line * l2 = new Line(mid, arrowhead03);
+				l2->set_color(Color::blue);
+				Line * l3 = new Line(mid, arrowhead04);
+				l3->set_color(Color::blue);
+				mid.y += -8;
+				Text * t2 = new Text(arrowhead03, to_string(t->peso));
+				t2->set_color(Color::red);
+				t2->set_font_size(10);
+				this->attach(*l);
+				this->attach(*l2);
+				this->attach(*l3);
+				this->attach(*t2);
+				vec3.push_back(l);
+				vec3.push_back(l2);
+				vec3.push_back(l3);
+				vec4.push_back(t2);
+			}
+			open = true;
+			this->redraw();
+		}
+		if (entrada.get_string() == "cleart") {
+			salida.put("");
+			this->redraw();
+			while (vec5.size() != 0) {
+				vec5.pop_back();
+			}
+		}
+		if (open == false) {
+			for (int i = 0; i < vec5.size(); i++) {
+				if (vec5.at(i) == "No hay archivo abierto") {
+					return;
+				}
+			}
+			vec5.push_back("No hay archivo abierto");
+			entrada.clean();
+			string s = "";
+			for (int i = 0; i < vec5.size(); i++) {
+				s += vec5.at(i) + "\n";
+			}
+			salida.put(s);
+			return;
+		}
 		if (entrada.get_string() == "close"){
 			ad->cerrar();
+			ad2->cerrar();
 			vec5.push_back(entrada.get_string());
 			string s = "";
 			for (int i = 0; i < vec5.size(); i++) {
@@ -224,76 +357,22 @@ struct Ventana :
 			salida.put(s);
 			clear();
 		}
-		if (entrada.get_string() == "cleart") {
-			salida.put("");
-			this->redraw();
-			while (vec5.size() != 0) {
-				vec5.pop_back();
-			}
-		}
-		if (split(entrada.get_string(),' ').at(0) == "open") {
-			if (open) {
-				while (vec.size() != 0) {
-					Circle *t = vec.back();
-					vec.pop_back();
-					this->detach(*t);
-					delete(t);
-				}
-				while (vec2.size() != 0) {
-					Text *t = vec2.back();
-					vec2.pop_back();
-					this->detach(*t);
-					delete(t);
-				}
-				while (vec3.size() != 0) {
-					Line *l = vec3.back();
-					vec3.pop_back();
-					this->detach(*l);
-					delete(l);
-				}
-				while (vec4.size() != 0) {
-					Text *t = vec4.back();
-					vec4.pop_back();
-					this->detach(*t);
-					delete(t);
-				}
-				while (ed.size() != 0) {
-					Edge * t = ed.back();
-					ed.pop_back();
-					delete(t);
-				}
-			}
-			vec5.push_back(entrada.get_string());
-			string s = "";
-			for (int i = 0; i < vec5.size(); i++) {
-				s += vec5.at(i) + "\n";
-			}
-			salida.put(s);
-			nombre = split(entrada.get_string(), ' ').at(1);
-			ad = new ArchivoDirecto(nombre+ ".VRT" );
-			for (int i = 0; i < ad->tam(); i++) {
-				Nodo q = ad->leer(i);
-				if (q.valor != -1) {
-					ad->actualizar(q);
-					Circle * c = new Circle(Point(q.coorX + 160, q.coorY), 5);
-					Text * t = new Text(Point(q.coorX + 154, q.coorY - 6), to_string(q.valor));
-					c->set_color(Color::black);
-					c->set_fill_color(Color::black);
-					t->set_color(Color::black);
-					t->set_font_size(10);
-					this->attach(*c);
-					this->attach(*t);
-					vec.push_back(c);
-					vec2.push_back(t);
-				}
-			}
-			this->redraw();
-		}
 		if (split(entrada.get_string(), ' ').at(0) == "node") {
 			int valor = stoi(split(entrada.get_string(), ' ').at(1));
+			int gradoE = 0;
+			int gradoS = 0;
 			Nodo n = ad->leer(valor);
 			vec5.push_back(entrada.get_string());
 			vec5.push_back("Coordenadas: \n(" + to_string(n.coorX) + "," + to_string(n.coorY)+ ")");
+			for (int i = 0; i < ed.size();i++) {
+				if (ed.at(i)->orig == n.valor) {
+					gradoS++;
+				}
+				if (ed.at(i)->dest == n.valor) {
+					gradoE++;
+				}
+			}
+			vec5.push_back("Grado entrada: " + to_string(gradoE) + "\nGrado salida: " + to_string(gradoS));
 			string s = "";
 			for (int i = 0; i < vec5.size(); i++) {
 				s += vec5.at(i) + "\n";
@@ -305,6 +384,16 @@ struct Ventana :
 		if (split(entrada.get_string(), ' ').at(0) == "arcs") {
 			int valor = stoi(split(entrada.get_string(), ' ').at(1));
 			Nodo n = ad->leer(valor);
+			if (n.valor == -1) {
+				vec5.push_back("No existe el nodo");
+				entrada.clean();
+				string s = "";
+				for (int i = 0; i < vec5.size(); i++) {
+					s += vec5.at(i) + "\n";
+				}
+				salida.put(s);
+				return;
+			}
 			vec5.push_back(entrada.get_string());
 			string s = "";
 			for (int i = 0; i < ed.size(); i++) {
@@ -342,9 +431,9 @@ struct Ventana :
 			this->redraw();
 		}
 		if (split(entrada.get_string(), ' ').at(0) == "spt") {
-			if (entrada.get_string().size() < 4) { 
-				entrada.clean(); 
-				return; 
+			if (entrada.get_string().size() < 4) {
+				entrada.clean();
+				return;
 			}
 			vec5.push_back(entrada.get_string());
 			string s = "";
@@ -356,6 +445,7 @@ struct Ventana :
 			Nodo n = ad->leer(stoi(split(entrada.get_string(), ' ').at(1)));
 			inodo(n);
 			spts = stoi(split(entrada.get_string(), ' ').at(1));
+			cout << ad->gtamn() << endl;
 			vector<vector<int>> temp = driver(ad->gtamn(), stoi(split(entrada.get_string(), ' ').at(1)), ed);
 			for (int i = 0; i < temp.size(); i++) {
 				for (int k = 0; k < vec3.size(); k++) {
@@ -387,6 +477,13 @@ struct Ventana :
 		}
 		if (split(entrada.get_string(), ' ').at(0) == "to") {
 			if (split(vec5.back(), ' ').at(0) != "spt") {
+				vec5.push_back("Spt no realizado");
+				entrada.clean();
+				string s = "";
+				for (int i = 0; i < vec5.size(); i++) {
+					s += vec5.at(i) + "\n";
+				}
+				salida.put(s);
 				return;
 			}
 			vec5.push_back(entrada.get_string());
@@ -473,6 +570,7 @@ public:
 	int spts;
 	string nombre;
 	ArchivoDirecto * ad;
+	ArchivoDirecto2 * ad2;
 	bool open = false;
 	vector<Edge*> ed;
 	vector<Circle*> vec;
@@ -480,12 +578,13 @@ public:
 	vector<Line*> vec3;
 	vector<Text*> vec4;
 	vector<string> vec5;
-	Ventana(Point xy, int w, int h, const string& title, ArchivoDirecto * ad)
+	Ventana(Point xy, int w, int h, const string& title, ArchivoDirecto * ad, ArchivoDirecto2 * ad2)
 		: Window(xy, w, h, title), 
 		button_pushed(false),
 		salida(Point(0, 0), 150, 725, "Salida"),
 		entrada(Point(0, 725), 150, 25, "Entrada"),
-		ad{ ad }
+		ad{ ad },
+		ad2{ ad2 }
 	{
 		attach(salida);
 		attach(entrada);

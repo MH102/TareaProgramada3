@@ -39,7 +39,7 @@ private:
 	int tamn;
 	fstream fs;
 	bool abierto;
-	bool test = false;
+	bool test;
 public:
 	ArchivoDirecto(string nombre);
 	ArchivoDirecto();
@@ -59,7 +59,7 @@ ArchivoDirecto::ArchivoDirecto(string nombre) {
 		fs.open(nombre, ios_base::binary | ios_base::out);
 		nRegistros = 0;
 		tamn = 0;
-		escribeCabecera(nRegistros,fs);
+		escribeCabecera(nRegistros, fs);
 		fs.close();
 		fs.open(nombre, ios_base::binary | ios_base::in | ios_base::out);
 	}
@@ -68,8 +68,8 @@ ArchivoDirecto::ArchivoDirecto(string nombre) {
 		fs.read(as_bytes(nRegistros), sizeof(nRegistros));
 		test = true;
 	}
-	abierto = true;
 	nArchivo = nombre;
+	abierto = true;
 	init();
 }
 string ArchivoDirecto::info() {
@@ -91,9 +91,7 @@ void ArchivoDirecto::actualizar(Nodo& r) {
 	if (abierto && r.valor < nRegistros) {
 		fs.seekp(sizeof(int) + r.valor * sizeof(Nodo));
 		fs.write(as_bytes(r), sizeof(Nodo));
-		if (r.valor == -1) {
-			tamn++;
-		}
+		tamn++;
 	}
 }
 void ArchivoDirecto::agregarFinal(Nodo& r) {
@@ -118,7 +116,7 @@ void ArchivoDirecto::init() {
 Nodo ArchivoDirecto::leer(int i) {
 	if (!abierto || i >= nRegistros)
 		throw 1001;
-	fs.seekp(sizeof(int) + i * sizeof(Nodo));
+		fs.seekp(sizeof(int) + i * sizeof(Nodo));
 	Nodo r = Nodo(0, 0, 0);
 	fs.read(as_bytes(r), sizeof(Nodo));
 	return r;
