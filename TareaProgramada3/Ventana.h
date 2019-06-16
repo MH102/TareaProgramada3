@@ -116,7 +116,7 @@ struct Ventana :
 				d = stoi(r.at(3));
 				f = stoi(r.at(4));
 				Edge * e = new Edge(a, b, c, d, f);
-				Edge ald(a, b, c, d, f);
+				BPage ald(a, b, c, d, f);
 				ad2->actualizar(loop,ald);
 				loop++;
 				ed.push_back(e);
@@ -240,7 +240,8 @@ struct Ventana :
 			for (int i = 0; i < ad2->tam(); i++) {
 				if (ad2->leer(i).orig != -1) {
 					Edge * t = new Edge(ad2->leer(i).orig, ad2->leer(i).dest, ad2->leer(i).dist, ad2->leer(i).velMax, ad2->leer(i).velPro);
-					ad2->actualizar(i, *t);
+					BPage tt(ad2->leer(i).orig, ad2->leer(i).dest, ad2->leer(i).dist, ad2->leer(i).velMax, ad2->leer(i).velPro);
+					ad2->actualizar(i, tt);
 					cout << t->orig << " " << t->dest << endl;
 					ed.push_back(t);
 				}

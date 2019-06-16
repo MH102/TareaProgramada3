@@ -85,6 +85,27 @@ void sort(int *p, int n)
 		}
 	}
 }
+struct BPage {
+	int orig;
+	int dest;
+	int dist;
+	int velMax;
+	int velPro;
+	int peso;
+	BPage(int origP, int destP, int distP, int velMaxP, int velProP) {
+		orig = origP;
+		dest = destP;
+		dist = distP;
+		velMax = velMaxP;
+		velPro = velProP;
+		if (velPro == 0) {
+			peso = 100;
+		}
+		else {
+			peso = (dist * 60) / velPro;
+		}
+	}
+};
 int split_child(BTreeNode *x, int i)
 {
 	int j, mid;
@@ -211,7 +232,7 @@ char * as_bytes2(int p) {
 	void * addr = &p;
 	return static_cast<char*>(addr);
 }
-char * as_bytes2(Edge& p) {
+char * as_bytes2(BPage& p) {
 	void * addr = &p;
 	return static_cast<char*>(addr);
 }
@@ -234,11 +255,11 @@ public:
 	string info();
 	void cerrar();
 	int tam();
-	void actualizar(int i, Edge& r);
-	void agregarFinal(Edge& r);
+	void actualizar(int i, BPage& r);
+	void agregarFinal(BPage& r);
 	void init();
 	int gtamn();
-	Edge leer(int i);
+	BPage leer(int i);
 	void limpiar();
 };
 ArchivoDirecto2::ArchivoDirecto2(string nombre) {
@@ -275,19 +296,19 @@ int ArchivoDirecto2::tam() {
 int ArchivoDirecto2::gtamn() {
 	return tamn;
 }
-void ArchivoDirecto2::actualizar(int i, Edge& r) {
+void ArchivoDirecto2::actualizar(int i, BPage& r) {
 	if (abierto && r.orig < nRegistros) {
-		fs.seekp(sizeof(int) + i * sizeof(Edge));
-		fs.write(as_bytes(r), sizeof(Edge));
+		fs.seekp(sizeof(int) + i * sizeof(BPage));
+		fs.write(as_bytes(r), sizeof(BPage));
 		if (r.orig == -1) {
 			tamn++;
 		}
 	}
 }
-void ArchivoDirecto2::agregarFinal(Edge& r) {
+void ArchivoDirecto2::agregarFinal(BPage& r) {
 	if (abierto) {
-		fs.seekp(sizeof(int) + nRegistros * sizeof(Edge));
-		fs.write(as_bytes(r), sizeof(Edge));
+		fs.seekp(sizeof(int) + nRegistros * sizeof(BPage));
+		fs.write(as_bytes(r), sizeof(BPage));
 		nRegistros++;
 		escribeCabecera2(nRegistros, fs);
 	}
@@ -295,7 +316,7 @@ void ArchivoDirecto2::agregarFinal(Edge& r) {
 void ArchivoDirecto2::init() {
 	if (!test) {
 		for (int i = 0; i < 1000; i++) {
-			Edge q(-1, -1, -1, -1, -1);
+			BPage q(-1, -1, -1, -1, -1);
 			agregarFinal(q);
 		}
 	}
@@ -303,12 +324,12 @@ void ArchivoDirecto2::init() {
 		nRegistros = 999;
 	}
 }
-Edge ArchivoDirecto2::leer(int i) {
+BPage ArchivoDirecto2::leer(int i) {
 	if (!abierto || i >= nRegistros)
 		throw 1001;
-	fs.seekp(sizeof(int) + i * sizeof(Edge));
-	Edge r(0,0,0,0,0);
-	fs.read(as_bytes2(r), sizeof(Edge));
+	fs.seekp(sizeof(int) + i * sizeof(BPage));
+	BPage r(0,0,0,0,0);
+	fs.read(as_bytes2(r), sizeof(BPage));
 	return r;
 }
 void ArchivoDirecto2::limpiar() {
